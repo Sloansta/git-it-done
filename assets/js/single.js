@@ -1,4 +1,6 @@
 let issueContainerEl = document.querySelector("#issues-container");
+let limitWarningEl = document.querySelector("#limit-warning");
+let repoNameEl = document.querySelector("#repo-name");
 
 function getRepoIssues(repo) {
 
@@ -7,10 +9,26 @@ function getRepoIssues(repo) {
         if(response.ok) {
             response.json().then((data) => {
                 displayIssues(data);
+
+                // check if api has paginated issues 
+                if(response.headers.get("Link"))
+                    displayWarning(repo);
             });
-        }else 
-            alert("ERROR There was a problem with your request");
-    })
+        }else {
+            alert("ERROR There was a problem with your request. Redirecting you to the homepage.");
+            document.location.replace("./index.html");
+        } 
+    });
+}
+
+function getRepoName() {
+    let queryString = document.location.search;
+    let repoName = queryString.split("=")[1];
+    if(repoName) {
+        repoNameEl.textContent = repoName;
+        getRepoIssues(repoName);
+    }else
+        document.location.replace("./index.html");
 }
 
 function displayIssues(issues) {
@@ -42,4 +60,15 @@ function displayIssues(issues) {
     }
 }
 
-getRepoIssues("sloansta/git-it-done");
+function displayWarning(repo) {
+    limitWarningEl.textContent = "To see more than 30 issues. "
+
+    let linkEl = document.createElement("a");
+    linkEl.textContent = "See more issues on Github.com";
+    linkEl.setAttribute("href", "https://github.com/" + repo + "/issues");
+    linkEl.setAttribute("target",  "_blank");
+
+    limitWarningEl.appendChild(linkEl);
+}
+
+getRepoName();
