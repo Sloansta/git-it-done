@@ -19,13 +19,24 @@ function formSubmitHandler(event) {
 function getUserRepos(user) {
     let apiUrl = "https://api.github.com/users/"+ user +"/repos";
     fetch(apiUrl).then((response) => {
-        response.json().then((data) => {
-            displayRepos(data, user);
-        });
-    });
+        if(response.ok) {
+            response.json().then((data) => {
+                displayRepos(data, user);
+            });
+        }else 
+            alert("Error: Github user not found");
+    }).catch((error) => {
+        alert("Unable to connect to Github. ERROR: " + error);
+    })
 }
 
 function displayRepos(repos, searchTerm) {
+    // check if api returned any repos
+    if(repos.length === 0) {
+        repoContainerEl.textContent = "No repositories found."
+        return;
+    }
+
     repoContainerEl.textContent = "";
     repoSearchTerm.textContent = searchTerm;
 
